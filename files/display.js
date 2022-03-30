@@ -1,14 +1,15 @@
-let c
-let board
+let c, board
 let camera = {scale: 10, offsetX: 20, offsetY: 20} //Global scale and offset data
 let mouse = {x: 0, y: 0}
 
+let wallScale = 1.22
 
-let drawHex = (x, y, state) => {
+let drawHex = (x, y, state, walls = 0) => {
     //Get position data
     let xOffset = ((x*11) * camera.scale) + (camera.offsetX * camera.scale)
     let yOffset = ((x*-6 + y*12) * camera.scale) + (camera.offsetY * camera.scale)
 
+    board.strokeStyle = '#fff'
     //Apply correct styling
     board.lineWidth = camera.scale
     if(state == "Bomb"){
@@ -37,8 +38,54 @@ let drawHex = (x, y, state) => {
     board.closePath()
     board.stroke()
     board.fill()
-}
 
+    if(walls > 0){
+        board.strokeStyle = '#000'
+        if((walls & 1) == 1){
+            board.beginPath()
+            board.moveTo((-6 * camera.scale * wallScale) + xOffset, (0  * camera.scale * wallScale) + yOffset)
+            board.lineTo((-3 * camera.scale * wallScale) + xOffset, (-5 * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+        if((walls & 2) == 2){
+            board.beginPath()
+            board.moveTo((-3 * camera.scale * wallScale) + xOffset, (-5 * camera.scale * wallScale) + yOffset)
+            board.lineTo((3  * camera.scale * wallScale) + xOffset, (-5 * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+        if((walls & 4) == 4){
+            board.beginPath()
+            board.moveTo((3  * camera.scale * wallScale) + xOffset, (-5 * camera.scale * wallScale) + yOffset)
+            board.lineTo((6  * camera.scale * wallScale) + xOffset, (0  * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+        if((walls & 8) == 8){
+            board.beginPath()
+            board.moveTo((6  * camera.scale * wallScale) + xOffset, (0  * camera.scale * wallScale) + yOffset)
+            board.lineTo((3  * camera.scale * wallScale) + xOffset, (5  * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+        if((walls & 16) == 16){
+            board.beginPath()
+            board.moveTo((3  * camera.scale * wallScale) + xOffset, (5  * camera.scale * wallScale) + yOffset)
+            board.lineTo((-3 * camera.scale * wallScale) + xOffset, (5  * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+        if((walls & 32) == 32){
+            board.beginPath()
+            board.moveTo((-3 * camera.scale * wallScale) + xOffset, (5  * camera.scale * wallScale) + yOffset)
+            board.lineTo((-6 * camera.scale * wallScale) + xOffset, (0  * camera.scale * wallScale) + yOffset)
+            board.closePath()
+            board.stroke()
+        }
+    }
+
+}
 
 let move = (e) => { //Move and Scale viewport
     if(e.keyCode == 87){ //W
@@ -73,7 +120,8 @@ let draw = () => { // Draw provided data
     board.clearRect(0,0,10000,10000)
     //Draw hexes
     for(hex of hexList){
-        drawHex(hex[0], hex[1], hex[2])
+        let hex3 = (typeof hex[3] !== 'undefined') ? hex[3] : 0
+        drawHex(hex[0], hex[1], hex[2], hex3)
     }
     drawHex(mouse.x, mouse.y, "Cursor")
     //Draw ui (later so it's on top)
